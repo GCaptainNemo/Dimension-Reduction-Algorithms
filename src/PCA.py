@@ -18,12 +18,7 @@ class PCA:
 
     def make_data(self):
         self.X_data, self.Y_data = make_moons(100, noise=.04, random_state=0)
-        self.X_data = self.X_data - np.mean(self.mat, 0)
-        one_index = np.where(self.Y_data == 1)
-        zero_index = np.where(self.Y_data == 0)
-        plt.scatter(self.X_data[one_index, 0], self.X_data[one_index, 1], c='r')
-        plt.scatter(self.X_data[zero_index, 0], self.X_data[zero_index, 1], c='b')
-        plt.show()
+        self.X_data = self.X_data - np.mean(self.X_data, 0)
 
     def PCA(self):
         """ bottom-to-top clustering """
@@ -34,17 +29,29 @@ class PCA:
         self.new_mat = self.Projective_matrix.T @ centeralized_mat
 
     def result(self):
+        translate_vector = [- self.Projective_matrix[1, 0], self.Projective_matrix[0, 0]]
         for i in range(self.new_mat.shape[1]):
             if self.Y_data[i] == 1:
-                plt.scatter(self.new_mat[0, i], 0, c='r')
-                plt.scatter(self.new_mat[0, i] * self.Projective_matrix[0, 0],
-                            self.new_mat[0, i] * self.Projective_matrix[1, 0], c='r')
+                # plt.scatter(self.new_mat[0, i], 0, c='r')
+                plt.scatter(self.new_mat[0, i] * self.Projective_matrix[0, 0] + translate_vector[0],
+                            self.new_mat[0, i] * self.Projective_matrix[1, 0] + translate_vector[1], c='r')
             else:
-                plt.scatter(self.new_mat[0, i], 0, c='b')
-                plt.scatter(self.new_mat[0, i] * self.Projective_matrix[0, 0],
-                            self.new_mat[0, i] * self.Projective_matrix[1, 0], c='b')
+                # plt.scatter(self.new_mat[0, i], 0, c='b')
+                plt.scatter(self.new_mat[0, i] * self.Projective_matrix[0, 0] + translate_vector[0],
+                            self.new_mat[0, i] * self.Projective_matrix[1, 0] + translate_vector[1], c='b')
+        one_index = np.where(self.Y_data == 1)
+        zero_index = np.where(self.Y_data == 0)
+        plt.scatter(self.X_data[one_index, 0], self.X_data[one_index, 1], c='r')
+        plt.scatter(self.X_data[zero_index, 0], self.X_data[zero_index, 1], c='b')
         ax = plt.gca()
         ax.axis("equal")
+        ax.annotate("",
+                    xy=(translate_vector[0], translate_vector[1]),
+                    xytext=(0, 0),
+                    # xycoords="figure points",
+                    arrowprops=dict(arrowstyle="->", color="k"))
+        plt.text(translate_vector[0] * 0.95 + 0.05, translate_vector[1] * 0.95,
+                 r'projection', fontdict={'size': 8, 'color': 'k'})
         plt.show()
 
 
@@ -53,6 +60,5 @@ if __name__ == "__main__":
     a.make_data()
     a.PCA()
     a.result()
-    # a.prediction()
 
 
