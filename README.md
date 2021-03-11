@@ -1,2 +1,36 @@
 # dimension-reduction-algorithms
-introduce LDA, QDA, PCA dimension reduction algorithms
+## 一、介绍
+
+
+
+
+## 二、PCA
+主成分分析(Principal Component Analysis, PCA)是一种**无监督的线性降维算法**，假设每次采样得到x∈R<sup>d</sup>维数据，共有n个样本，构成d行n列矩阵X∈R<sup>d×n</sup>。
+将d维向量降为k维，目标是选择k个归一化正交基，使得原始数据投影到这组基上后，不同特征之间协方差为0，而每个特征的方差尽可能大。
+
+### 2.1 协方差矩阵特征值分解视角
+
+设有n条d维数据，构成d行n列矩阵X
+1. 将X的每一行(每一个特征)减去该行均值(中心化)
+2. 求出协方差矩阵S = 1/mXX<sup>T</sup>
+3. 对协方差矩阵进行特征值分解S = QAQ<sup>T</sup>
+4. 取前k个最大特征值对应的特征向量按列构成矩阵Q<sub>k</sub>
+5. P = Q<sub>k</sub><sup>T</sup>X即为降维到k维后的数据
+
+可以做一个简单的理论分析，降维后的数据的协方差矩阵为PP<sup>T</sup> = Q<sub>k</sub><sup>T</sup>X X<sup>T</sup>Q<sub>k</sub> = A<sub>k</sub>，
+即新数据的协方差矩阵是一个k维对角阵，且对角元素为对角阵A的最大k个特征值。
+
+### 2.2 奇异值分解视角
+
+设有n条d维数据，构成d行n列矩阵X
+1. 将X的每一行(每一个特征)减去该行均值(中心化)
+2. 对X进行奇异值分解，X = U∑V<sup>T</sup>，取X的最大k个奇异值对应的左奇异向量构成矩阵U<sub>k</sup>
+3. P = U<sub>k</sub><sup>T</sup>X即为降维到k维后的数据
+
+同样的，这种操作也可以证明降维后的数据协方差矩阵为对角阵，且对角元素为最大k个奇异值的平方。2.1和2.2的做法是完全等价的，相比而言奇异值分解更简洁，
+使用右奇异矩阵可以对数据的列进行降维，使用左奇异值矩阵可以对数据的行进行降维。
+
+## 三、LDA
+
+## 四、QDA
+
