@@ -6,7 +6,7 @@
 假设每次采样得到x∈R<sup>d</sup>维数据，共n个样本，构成d行n列矩阵X∈R<sup>d×n</sup>。将d维向量降为k维，PCA的做法是选择k个归一化正交基，张成一个K维超平面W，
 使得数据投影到这个k维超平面之后，样本点新坐标W<sup>T</sup>x能尽可能的分开(方差最大化)。表述成优化问题即：
 
-![PCA-max-variance](../resources/PCA/PCA.png)
+![PCA-max-variance](../resources/PCA/max_variance.png)
 
 通过拉格朗日乘子法，可以得到最优解W*为协方差矩阵XX<sup>T</sup>前k个最大的特征值对应特征向量作为列向量组成的矩阵，2.1和2.2给出两种等价的PCA算法。
 
@@ -44,4 +44,19 @@
 ![PCA-result](../results/PCA_2.png)
 
 ## 四、总结
+PCA的算法可以基于两个性质进行等价推导，一是前面介绍的最大可分性，即投影到超平面后新坐标的方差最大，这是比较常见的推导PCA算法的假设。还有一种是最近重构性，即样本点到这个超平面的距离最近，
+表述成优化问题的形式即：
+
+![PCA-min-distance](../resources/PCA/min_distance.png)
+
+由于Frobenius范数满足||A||<sub>F</sub><sup>2</sup> = trace(A<sup>T</sup>A)，将Frobenius范数写成矩阵的迹的形式可得与最大可分性同样的优化形式，说明了这两种不同表述的等价性。
+
+
+## 五、参考资料
+[1] 周志华. 机器学习 : = Machine learning[M]. 清华大学出版社, 2016.(第十章)
+
+
+
+
+
 
