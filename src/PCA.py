@@ -35,7 +35,6 @@ class PCA:
             self.X_data = self.X_data - np.mean(self.X_data, 0)
 
     def PCA(self):
-        """ bottom-to-top clustering """
         mat = np.mat(self.X_data).T
         centeralized_mat = mat - np.mean(mat, 1)
         u, sigma, v = np.linalg.svd(centeralized_mat)
