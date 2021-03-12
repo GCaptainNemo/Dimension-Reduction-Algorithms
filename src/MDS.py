@@ -31,10 +31,9 @@ class MDS:
             self.Y_data = np.concatenate([y, new_y], axis=0)
             print(self.X_data.shape)
         else:
-            self.X_data, self.Y_data = make_moons(50, noise=.04, random_state=0)
+            self.X_data, self.Y_data = make_moons(10, noise=.04, random_state=0)
 
     def MDS(self):
-
         self.D = self.construct_distance_matrix()
         self.B = self.construct_innerprod_matrix()
         # A是对角阵，Q是特征向量矩阵
@@ -42,8 +41,6 @@ class MDS:
         A, Q = np.linalg.eig(self.B)
         Qk = Q[:, :self.reduced_dimension].real
         Ak = np.diag(A[:self.reduced_dimension].real ** 0.5)
-        print(Ak)
-        print(Qk)
         self.new_data = Qk @ Ak
         print(self.new_data.shape)
 
@@ -78,21 +75,48 @@ class MDS:
                 innerprod_matrix[j, i] = innerprod_matrix[i, j]
         return innerprod_matrix
 
-    def result(self, regression=False):
-        for i in range(self.new_data.shape[0]):
-            if self.Y_data[i] == 1:
-                # plt.scatter(self.new_data[i, 0], 0, c='r')
-                plt.scatter(self.new_data[i, 0], self.new_data[i, 1], c='r')
-            else:
-                # plt.scatter(self.new_data[i, 0], 0, c='b')
-                plt.scatter(self.new_data[i, 0], self.new_data[i, 1], c='b')
+    def result(self):
+        plt.subplot(1, 2, 1)
+        plt.title("Origin data")
+        one_index = np.where(self.Y_data == 1)
+        zero_index = np.where(self.Y_data == 0)
+        plt.scatter(self.X_data[one_index, 0], self.X_data[one_index, 1], c='r')
+        plt.scatter(self.X_data[zero_index, 0], self.X_data[zero_index, 1], c='b')
+        translate = 0.1
+        for i in range(self.X_data.shape[0]):
+            plt.text(self.X_data[i, 0], self.X_data[i, 1] + translate,
+                 i, fontdict={'size': 8, 'color': 'k'})
 
-        # one_index = np.where(self.Y_data == 1)
-        # zero_index = np.where(self.Y_data == 0)
-        # plt.scatter(self.X_data[one_index, 0], self.X_data[one_index, 1], c='r')
-        # plt.scatter(self.X_data[zero_index, 0], self.X_data[zero_index, 1], c='b')
         ax = plt.gca()
         ax.axis("equal")
+        plt.subplot(1, 2, 2)
+        plt.title("MDS")
+        if self.reduced_dimension == 2:
+            for i in range(self.new_data.shape[0]):
+                if self.Y_data[i] == 1:
+                    plt.scatter(self.new_data[i, 0], self.new_data[i, 1], c='r')
+                    plt.text(self.new_data[i, 0], self.new_data[i, 1] + translate,
+                                 i, fontdict={'size': 8, 'color': 'k'})
+                else:
+                    plt.scatter(self.new_data[i, 0], self.new_data[i, 1], c='b')
+                    plt.text(self.new_data[i, 0], self.new_data[i, 1] + translate,
+                             i, fontdict={'size': 8, 'color': 'k'})
+        else:
+            for i in range(self.new_data.shape[0]):
+                if self.Y_data[i] == 1:
+                    plt.scatter(self.new_data[i, 0], 0, c='r')
+                    plt.text(self.new_data[i, 0], translate,
+                             i, fontdict={'size': 8, 'color': 'k'})
+                else:
+                    plt.scatter(self.new_data[i, 0], 0, c='b')
+                    plt.text(self.new_data[i, 0], translate,
+                             i, fontdict={'size': 8, 'color': 'k'})
+
+        ax = plt.gca()
+        ax.axis("equal")
+
+        plt.show()
+
         # ax.annotate("",
         #             xy=(translate_vector[0], translate_vector[1]),
         #             xytext=(0, 0),
@@ -104,7 +128,6 @@ class MDS:
         # else:
         #     plt.text(translate_vector[0] * 0.95 + 0.05, translate_vector[1] * 0.95,
         #              r'projection', fontdict={'size': 8, 'color': 'k'})
-        plt.show()
 
 
 if __name__ == "__main__":
