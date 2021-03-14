@@ -9,18 +9,25 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.datasets import make_moons, make_regression
+from sklearn.datasets import make_swiss_roll
 from scipy.spatial import KDTree
+import mpl_toolkits.mplot3d.axes3d as p3
+from sklearn.cluster import AgglomerativeClustering
 
 
 class ShortestPath:
     @staticmethod
-    def floyd_algorithm(path_matrix, dist_matrix):
+    def floyd_algorithm(adjacency_matrix):
         """
         给定一张有向带权图的邻接矩阵，求任意两点之间的最短路径
         :param adjacency_matrix: 邻接矩阵，第i行j列的数代表从xi到xj的邻接距离
         :return: 最短距离矩阵，路径矩阵
         """
+        n = adjacency_matrix.shape[0]
+        path_matrix = -np.ones([n, n], dtype=int)
+        dist_matrix = adjacency_matrix.copy()
+        print("adjacency_matrix = ", adjacency_matrix)
+
         n = path_matrix.shape[0]
         for v in range(n):
             # 途经点循环
@@ -29,7 +36,7 @@ class ShortestPath:
                     if dist_matrix[i, j] > dist_matrix[i, v] + dist_matrix[v, j]:
                         dist_matrix[i, j] = dist_matrix[i, v] + dist_matrix[v, j]
                         path_matrix[i, j] = v
-        print("dist_matrix = ", dist_matrix)
+        return dist_matrix, path_matrix
 
     @staticmethod
     def print_floyd_path(path_matrix, source, destination):
@@ -89,23 +96,10 @@ class ISOMAP:
         """
         self.reduced_dimension = k
 
-    def make_data(self, regression=False):
-        if regression:
-            x, y = make_regression(n_samples=50, n_features=1,
-                                   n_targets=1, noise=1.5, random_state=1, bias=0)
-            y = np.array([y]).T
-            print(y.shape)
-            self.X_data = np.concatenate([x, y], axis=1)
-            new_X_data = self.X_data - np.array([[15, 13]])
-
-            self.X_data = np.concatenate([self.X_data, new_X_data], axis=0)
-            self.X_data = self.X_data - np.mean(self.X_data, 0)
-            y = np.array([1 for _ in range(50)])
-            new_y = np.array([0 for _ in range(50)])
-            self.Y_data = np.concatenate([y, new_y], axis=0)
-            print(self.X_data.shape)
-        else:
-            self.X_data, self.Y_data = make_moons(10, noise=.04, random_state=0)
+    def make_data(self):
+        self.X_data, t = make_swiss_roll(1000, noise=0, random_state=0)
+        ward = AgglomerativeClustering(n_clusters=6, linkage='ward').fit(self.X_data)
+        self.Y_data = ward.labels_
 
     def construct_graph(self, k):
         """
@@ -123,27 +117,32 @@ class ISOMAP:
 
     def Isomap(self, knn=5):
         adjacency_matrix = self.construct_graph(knn)
-        n = self.X_data.shape[0]
-        path_matrix = -np.ones([n, n], dtype=int)
-        dist_matrix = adjacency_matrix.copy()
-        print("adjacency_matrix = ", adjacency_matrix)
-        ShortestPath.floyd_algorithm(path_matrix=path_matrix, dist_matrix=dist_matrix)
+        dist_matrix, _ = ShortestPath.floyd_algorithm(adjacency_matrix)
         self.D = dist_matrix
         print("self.D = ", self.D)
         self.MDS()
 
     def MDS(self):
         self.B = self.construct_innerprod_matrix()
+        if self.B is None:
+            return
         # A是对角阵，Q是特征向量矩阵
         # 注意可能由于数值精度产生虚数，可以直接取实部计算
         A, Q = np.linalg.eig(self.B)
         Qk = Q[:, :self.reduced_dimension].real
         Ak = np.diag(A[:self.reduced_dimension].real ** 0.5)
         self.new_data = Qk @ Ak
-        print(self.new_data.shape)
+        print("new_data.shape = ", self.new_data.shape)
 
     def construct_innerprod_matrix(self):
+        inf_ = np.where(self.D == np.inf)
+        if inf_[0].shape[0] != 0:
+            print("shape = ", self.D.shape)
+            print("not connected graph!", self.D[inf_])
+            return
+
         innerprod_matrix = np.zeros(self.D.shape)
+
         length = self.D.shape[0]
         meandist2 = np.mean(list(map(lambda x: x**2, self.D)))
         meandist2_column_lst = []
@@ -161,41 +160,43 @@ class ISOMAP:
         return innerprod_matrix
 
     def result(self):
-        plt.subplot(1, 2, 1)
-        plt.title("Origin data")
-        one_index = np.where(self.Y_data == 1)
-        zero_index = np.where(self.Y_data == 0)
-        plt.scatter(self.X_data[one_index, 0], self.X_data[one_index, 1], c='r')
-        plt.scatter(self.X_data[zero_index, 0], self.X_data[zero_index, 1], c='b')
-        translate = 0.1
-        for i in range(self.X_data.shape[0]):
-            plt.text(self.X_data[i, 0], self.X_data[i, 1] + translate,
-                 i, fontdict={'size': 8, 'color': 'k'})
+        fig = plt.figure()
+        # plt.title("Origin data")
 
-        ax = plt.gca()
-        ax.axis("equal")
-        plt.subplot(1, 2, 2)
+        ax = p3.Axes3D(fig)
+        ax.view_init(7, -80)
+
+        for l in np.unique(self.Y_data):
+            ax.scatter(self.X_data[self.Y_data == l, 0], self.X_data[self.Y_data == l, 1],
+                       self.X_data[self.Y_data == l, 2],
+                       color=plt.cm.jet(float(l) / np.max(self.Y_data + 1)),
+                       s=20, edgecolor='k')
+        plt.show()
+        # ax = plt.gca()
+        # ax.axis("equal")
+        plt.figure()
         plt.title("MDS")
         if self.reduced_dimension == 2:
-            for i in range(self.new_data.shape[0]):
-                if self.Y_data[i] == 1:
-                    plt.scatter(self.new_data[i, 0], self.new_data[i, 1], c='r')
-                    plt.text(self.new_data[i, 0], self.new_data[i, 1] + translate,
-                                 i, fontdict={'size': 8, 'color': 'k'})
-                else:
-                    plt.scatter(self.new_data[i, 0], self.new_data[i, 1], c='b')
-                    plt.text(self.new_data[i, 0], self.new_data[i, 1] + translate,
-                             i, fontdict={'size': 8, 'color': 'k'})
+            print("self.new_data = ", self.new_data)
+            for l in np.unique(self.Y_data):
+                plt.scatter(self.new_data[self.Y_data == l, 0], self.new_data[self.Y_data == l, 1],
+                           color=plt.cm.jet(float(l) / np.max(self.Y_data + 1)),
+                           s=20, edgecolor='k')
         else:
-            for i in range(self.new_data.shape[0]):
-                if self.Y_data[i] == 1:
-                    plt.scatter(self.new_data[i, 0], 0, c='r')
-                    plt.text(self.new_data[i, 0], translate,
-                             i, fontdict={'size': 8, 'color': 'k'})
-                else:
-                    plt.scatter(self.new_data[i, 0], 0, c='b')
-                    plt.text(self.new_data[i, 0], translate,
-                             i, fontdict={'size': 8, 'color': 'k'})
+            for l in np.unique(self.Y_data):
+                plt.scatter(self.new_data[self.Y_data == l, 0],
+                           color=plt.cm.jet(float(l) / np.max(self.Y_data + 1)),
+                           s=20, edgecolor='k')
+            #
+            # for i in range(self.new_data.shape[0]):
+            #     if self.Y_data[i] == 1:
+            #         plt.scatter(self.new_data[i, 0], 0, c='r')
+            #         # plt.text(self.new_data[i, 0], translate,
+            #         #          i, fontdict={'size': 8, 'color': 'k'})
+            #     else:
+            #         plt.scatter(self.new_data[i, 0], 0, c='b')
+            #         # plt.text(self.new_data[i, 0], translate,
+            #         #          i, fontdict={'size': 8, 'color': 'k'})
 
         ax = plt.gca()
         ax.axis("equal")
@@ -227,9 +228,9 @@ if __name__ == "__main__":
     # ShortestPath.print_djikstra_path(parent_lst, 0)
     # ShortestPath.floyd_algorithm(path_matrix, dist_matrix)
     # ShortestPath.print_floyd_path(path_matrix, 1, 0)
-    a = ISOMAP(1)  # 降至两维
+    a = ISOMAP(2)  # 降至两维
     a.make_data()
-    a.Isomap(5) # 用KNN建图
+    a.Isomap(10) # 用KNN建图
     a.result()
 
 
