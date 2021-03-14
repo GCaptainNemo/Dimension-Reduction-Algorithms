@@ -11,6 +11,56 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.datasets import make_moons, make_regression
 
+class ShortestPath:
+    @staticmethod
+    def floyd_algorithm(path_matrix, dist_matrix):
+        """
+        给定一张有向带权图的邻接矩阵，求任意两点之间的最短路径
+        :param adjacency_matrix: 邻接矩阵，第i行j列的数代表从xi到xj的邻接距离
+        :return: 最短距离矩阵，路径矩阵
+        """
+        for v in range(n):
+            # 途经点循环
+            for i in range(n):
+                for j in range(n):
+                    if dist_matrix[i, j] > dist_matrix[i, v] + dist_matrix[v, j]:
+                        dist_matrix[i, j] = dist_matrix[i, v] + dist_matrix[v, j]
+                        path_matrix[i, j] = v
+    @staticmethod
+    def print_floyd_path(path_matrix, source, destination):
+        if path_matrix[source, destination] < 0:
+            print("<{}, {}>".format(source, destination))
+            return
+        else:
+            # 中间经过节点
+            mid = path_matrix[source, destination]
+            ShortestPath.print_floyd_path(path_matrix, source, mid)
+            ShortestPath.print_floyd_path(path_matrix, mid, destination)
+
+    @staticmethod
+    def djikstra_algorithm(adjacency_matrix, obj_vertice):
+        n = adjacency_matrix.shape[0]
+        musk = [False for _ in range(n)]
+        dist = [np.inf for _ in range(n)]
+        parent = [-1 for _ in range(n)]
+        src_vertice = obj_vertice
+        dist[src_vertice] = 0
+        while False in musk:
+            musk[src_vertice] = True
+            for i in range(n):
+                if adjacency_matrix[src_vertice, i] != np.inf:
+                    if dist[src_vertice] + adjacency_matrix[src_vertice, i] < dist[i]:
+                        dist[i] = dist[src_vertice] + adjacency_matrix[src_vertice, i]
+            min_dist = np.inf
+            for j in range(n):
+                if musk[j] == False and dist[j] < min_dist:
+                    min_dist = dist[j]
+                    src_vertice = j
+        print(dist)
+        return dist
+
+
+
 
 class ISOMAP:
     def __init__(self, k):
@@ -61,35 +111,7 @@ class ISOMAP:
                 distance_matrix[j, i] = distance_matrix[i, j]
         return distance_matrix
 
-    @staticmethod
-    def floyd_algorithm(adjacency_matrix, path_matrix, dist_matrix):
-        """
-        给定一张有向带权图的邻接矩阵，求任意两点之间的最短路径
-        :param adjacency_matrix: 邻接矩阵，第i行j列的数代表从xi到xj的邻接距离
-        :return: 最短距离矩阵，路径矩阵
-        """
-        # n = adjacency_matrix.shape[0]
-        # path_matrix = -np.ones([n, n])
-        # dist_matrix = adjacency_matrix.copy()
-        for v in range(n):
-            # 途经点循环
-            for i in range(n):
-                for j in range(n):
-                    if dist_matrix[i, j] > dist_matrix[i, v] + dist_matrix[v, j]:
-                        dist_matrix[i, j] = dist_matrix[i, v] + dist_matrix[v, j]
-                        path_matrix[i, j] = v
-        # return dist_matrix, path_matrix
 
-    @staticmethod
-    def print_path(path_matrix, source, destination):
-        if path_matrix[source, destination] < 0:
-            print("<{}, {}>".format(source, destination))
-            return
-        else:
-            # 中间经过节点
-            mid = path_matrix[source, destination]
-            ISOMAP.print_path(path_matrix, source, mid)
-            ISOMAP.print_path(path_matrix, mid, destination)
 
     def construct_innerprod_matrix(self):
         innerprod_matrix = np.zeros(self.D.shape)
@@ -172,12 +194,9 @@ if __name__ == "__main__":
     n = adjacency_matrix.shape[0]
     path_matrix = -np.ones([n, n], dtype=int)
     dist_matrix = adjacency_matrix.copy()
-    # dist_matrix, path_matrix = ISOMAP.floyd_algorithm(adjacency_matrix)
-    ISOMAP.floyd_algorithm(adjacency_matrix, path_matrix, dist_matrix)
-
-    # print("path_matrix = ", path_matrix)
-    # print("dist_matrix = ", dist_matrix)
-    ISOMAP.print_path(path_matrix, 1, 0)
+    ShortestPath.djikstra_algorithm(adjacency_matrix, 1)
+    # ShortestPath.floyd_algorithm(path_matrix, dist_matrix)
+    # ShortestPath.print_floyd_path(path_matrix, 1, 0)
     # a = ISOMAP(2)
     # a.make_data()
     # a.MDS()
