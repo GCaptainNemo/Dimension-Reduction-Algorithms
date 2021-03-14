@@ -6,10 +6,10 @@ KPCA是PCA加上核技术，解决某些线性不可分的数据在用PCA投影�
 核技术就是将当前空间线性不可分的数据X通过映射φ映射到高维空间(又称为特征空间 feature space)进而线性可分。而KPCA实质上就是在特征空间(feature space)中对数据使用PCA。更具体一点，
 [PCA](PCA.md)是要计算原空间中数据的协方差矩阵1/N * XX<sup>T</sup>，然后进行特征值分解；而KPCA就是要计算特征空间中数据的协方差矩阵C=1/N * φ(X)φ(X)<sup>T</sup>并进行特征值分解(假设矩阵X和φ(X)每行的均值均为0)。
 
-**注意**：这里的映射φ是**隐式**的(implicit)，不必知道它的具体形式。在核技巧中，对称正定的核函数K(x, y)是已知的，φ是通过核函数K诱导出来的，即K(x, y) = <φ(x), φ(y)>。定义核矩阵(kernel matrix),
-K = φ(X)<sup>T</sup>φ(X) = [<φ(xi), φ(xj)>]<sub> i, j= 1, 2, 3, ..., m</sub>。
+**注意**：这里的映射φ是**隐式**的(implicit)，不必知道它的具体形式。在核技巧中，对称正定的核函数K(x, y)是已知的，φ是通过核函数K诱导出来的，即K(x, y) = <φ(x), φ(y)>，可以看到φ实质上是将原空间映射到完备的内积空间，
+因此特征空间也称为再生核希尔伯特空间(Reproducing Kernel Hilberte Space, RKHS)。定义核矩阵(kernel matrix) K = φ(X)<sup>T</sup>φ(X) = [<φ(xi), φ(xj)>]<sub> i, j= 1, 2, 3, ..., m</sub>。
 
-考虑一般矩阵不为0的情况，则特征空间协方差矩阵C为：
+考虑特征空间数据属性均值不为0的情况，则特征空间协方差矩阵C为：
 
 ![covariance-matrix](../resources/KPCA/covariance.jpg)
 
