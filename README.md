@@ -5,12 +5,12 @@
 
 ## 二、分类
 降维算法可以按照是否有监督，变换是否是线性的分成四类：
-1. 无监督的线性降维算法，比如[PCA](docs/PCA.md)、[MDS](docs/MDS.md)
+1. 无监督的线性降维算法，比如[PCA](docs/PCA.md)
 2. 有监督的线性降维算法，比如[LDA](docs/LDA.md)
-3. 无监督的非线性降维算法，比如[KPCA](docs/KPCA.md)、[ISOMAP](docs/ISOMAP.md)
+3. 无监督的非线性降维算法，比如[KPCA](docs/KPCA.md)、[MDS](docs/MDS.md)、[ISOMAP](docs/ISOMAP.md)、[LLE](docs/LLE.md)
 4. 有监督的非线性降维算法
 
-
+**注意**：这里线性指的是降维变换f:高维空间 -> 低维空间是线性的。MDS、Isomap是将一个非线性降维变换的求解问题转化成了一个线性代数问题，它们并不是线性降维算法。
 
 
 
