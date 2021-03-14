@@ -7,7 +7,7 @@
 降维算法可以按照是否有监督，变换是否是线性的分成四类：
 1. 无监督的线性降维算法，比如[PCA](docs/PCA.md)、[MDS](docs/MDS.md)
 2. 有监督的线性降维算法，比如[LDA](docs/LDA.md)
-3. 无监督的非线性降维算法，比如[KPCA](docs/KPCA.md)
+3. 无监督的非线性降维算法，比如[KPCA](docs/KPCA.md)、[ISOMAP](docs/ISOMAP.md)
 4. 有监督的非线性降维算法
 
 
