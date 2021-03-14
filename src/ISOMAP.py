@@ -10,6 +10,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.datasets import make_moons, make_regression
+from scipy.spatial import KDTree
+
 
 class ShortestPath:
     @staticmethod
@@ -19,6 +21,7 @@ class ShortestPath:
         :param adjacency_matrix: 邻接矩阵，第i行j列的数代表从xi到xj的邻接距离
         :return: 最短距离矩阵，路径矩阵
         """
+        n = path_matrix.shape[0]
         for v in range(n):
             # 途经点循环
             for i in range(n):
@@ -26,6 +29,8 @@ class ShortestPath:
                     if dist_matrix[i, j] > dist_matrix[i, v] + dist_matrix[v, j]:
                         dist_matrix[i, j] = dist_matrix[i, v] + dist_matrix[v, j]
                         path_matrix[i, j] = v
+        print("dist_matrix = ", dist_matrix)
+
     @staticmethod
     def print_floyd_path(path_matrix, source, destination):
         if path_matrix[source, destination] < 0:
@@ -40,26 +45,41 @@ class ShortestPath:
     @staticmethod
     def djikstra_algorithm(adjacency_matrix, obj_vertice):
         n = adjacency_matrix.shape[0]
-        musk = [False for _ in range(n)]
-        dist = [np.inf for _ in range(n)]
-        parent = [-1 for _ in range(n)]
+        musk_lst = [False for _ in range(n)]
+        dist_lst = [np.inf for _ in range(n)]
+        parent_lst = [-1 for _ in range(n)]
         src_vertice = obj_vertice
-        dist[src_vertice] = 0
-        while False in musk:
-            musk[src_vertice] = True
+        dist_lst[src_vertice] = 0
+        while False in musk_lst:
+            musk_lst[src_vertice] = True
             for i in range(n):
                 if adjacency_matrix[src_vertice, i] != np.inf:
-                    if dist[src_vertice] + adjacency_matrix[src_vertice, i] < dist[i]:
-                        dist[i] = dist[src_vertice] + adjacency_matrix[src_vertice, i]
+                    if dist_lst[src_vertice] + adjacency_matrix[src_vertice, i] < dist_lst[i]:
+                        dist_lst[i] = dist_lst[src_vertice] + adjacency_matrix[src_vertice, i]
+                        parent_lst[i] = src_vertice
             min_dist = np.inf
             for j in range(n):
-                if musk[j] == False and dist[j] < min_dist:
-                    min_dist = dist[j]
+                if musk_lst[j] == False and dist_lst[j] < min_dist:
+                    min_dist = dist_lst[j]
                     src_vertice = j
-        print(dist)
-        return dist
+        print(dist_lst)
+        print(parent_lst)
+        return dist_lst, parent_lst
 
+    @staticmethod
+    def print_djikstra_path(parent_lst, obj_vertex):
+        # 从源节点到目标节点(obj_vertex)的路径
+        a = obj_vertex
+        lst = []
+        while parent_lst[a] != -1:
+            lst.append(parent_lst[a])
+            a = parent_lst[a]
+        lst.reverse()
+        print("lst = ", lst)
 
+        for i in lst:
+            print(i, "->")
+        print(obj_vertex)
 
 
 class ISOMAP:
@@ -87,8 +107,32 @@ class ISOMAP:
         else:
             self.X_data, self.Y_data = make_moons(10, noise=.04, random_state=0)
 
+    def construct_graph(self, k):
+        """
+        :param k: k-nearest neighbour
+        :return: adjacency matrix
+        """
+        kd_tree = KDTree(self.X_data.copy())
+        n = self.X_data.shape[0]
+        adjacency_matrix = np.ones([n, n]) * np.inf
+        for i in range(n):
+            dist_tuple, index_tuple = kd_tree.query(self.X_data[i, :], k=k, p=2)
+            for index, value in enumerate(index_tuple):
+                adjacency_matrix[i, value] = dist_tuple[index]
+        return adjacency_matrix
+
+    def Isomap(self, knn=5):
+        adjacency_matrix = self.construct_graph(knn)
+        n = self.X_data.shape[0]
+        path_matrix = -np.ones([n, n], dtype=int)
+        dist_matrix = adjacency_matrix.copy()
+        print("adjacency_matrix = ", adjacency_matrix)
+        ShortestPath.floyd_algorithm(path_matrix=path_matrix, dist_matrix=dist_matrix)
+        self.D = dist_matrix
+        print("self.D = ", self.D)
+        self.MDS()
+
     def MDS(self):
-        self.D = self.construct_distance_matrix()
         self.B = self.construct_innerprod_matrix()
         # A是对角阵，Q是特征向量矩阵
         # 注意可能由于数值精度产生虚数，可以直接取实部计算
@@ -97,21 +141,6 @@ class ISOMAP:
         Ak = np.diag(A[:self.reduced_dimension].real ** 0.5)
         self.new_data = Qk @ Ak
         print(self.new_data.shape)
-
-    def construct_distance_matrix(self, distance=None):
-        length = self.X_data.shape[0]
-        distance_matrix = np.zeros([length, length])
-        if distance == None:
-            dis = lambda x, y: np.linalg.norm(x-y)
-        else:
-            dis = distance
-        for i in range(length):
-            for j in range(i, length):
-                distance_matrix[i, j] = dis(self.X_data[i, :], self.X_data[j, :])
-                distance_matrix[j, i] = distance_matrix[i, j]
-        return distance_matrix
-
-
 
     def construct_innerprod_matrix(self):
         innerprod_matrix = np.zeros(self.D.shape)
@@ -187,19 +216,20 @@ class ISOMAP:
 
 
 if __name__ == "__main__":
-    adjacency_matrix = np.array([[0, 5, np.inf, 7],
-                                 [np.inf, 0, 4, 2],
-                                 [3, 3, 0, 2],
-                                 [np.inf, np.inf, 1, 0]])
-    n = adjacency_matrix.shape[0]
-    path_matrix = -np.ones([n, n], dtype=int)
-    dist_matrix = adjacency_matrix.copy()
-    ShortestPath.djikstra_algorithm(adjacency_matrix, 1)
+    # adjacency_matrix = np.array([[0, 5, np.inf, 7],
+    #                              [np.inf, 0, 4, 2],
+    #                              [3, 3, 0, 2],
+    #                              [np.inf, np.inf, 1, 0]])
+    # n = adjacency_matrix.shape[0]
+    # path_matrix = -np.ones([n, n], dtype=int)
+    # dist_matrix = adjacency_matrix.copy()
+    # dist_lst, parent_lst = ShortestPath.djikstra_algorithm(adjacency_matrix, 1)
+    # ShortestPath.print_djikstra_path(parent_lst, 0)
     # ShortestPath.floyd_algorithm(path_matrix, dist_matrix)
     # ShortestPath.print_floyd_path(path_matrix, 1, 0)
-    # a = ISOMAP(2)
-    # a.make_data()
-    # a.MDS()
-    # a.result()
+    a = ISOMAP(1)  # 降至两维
+    a.make_data()
+    a.Isomap(5) # 用KNN建图
+    a.result()
 
 
