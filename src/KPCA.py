@@ -30,11 +30,13 @@ class KPCA:
         K_star = kernel_matrix - 1 / num * kernel_matrix @ \
                  np.mat(np.ones([num, num]))
         eig_value, eig_vector = np.linalg.eig(K_star)
-
-        U = eig_vector[:, 0:self.reduced_dimension].real
-        print(U)
+        eig_value = eig_value.real
+        # 最大的d'个特征值对应特征向量
+        sorted_index = np.argsort(-eig_value)[:self.reduced_dimension]
+        print(eig_value[sorted_index])
+        print(max(eig_value))
+        U = eig_vector[:, sorted_index].real
         diag = np.diag(1 / np.sqrt(np.diag(U.T @ kernel_matrix @ U)))
-        print("diag = ", diag)
         self.new_mat = diag @ U.T @ K_star
 
     def construct_kernel_matrix(self, kernel_function=None):

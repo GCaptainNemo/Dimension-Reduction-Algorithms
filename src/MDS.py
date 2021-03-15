@@ -39,8 +39,10 @@ class MDS:
         # A是对角阵，Q是特征向量矩阵
         # 注意可能由于数值精度产生虚数，可以直接取实部计算
         A, Q = np.linalg.eig(self.B)
-        Qk = Q[:, :self.reduced_dimension].real
-        Ak = np.diag(A[:self.reduced_dimension].real ** 0.5)
+        A = A.real
+        sorted_index = np.argsort(-A)[:self.reduced_dimension]
+        Qk = Q[:, sorted_index].real
+        Ak = np.diag(A[sorted_index].real ** 0.5)
         self.new_data = Qk @ Ak
         print(self.new_data.shape)
 

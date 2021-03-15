@@ -37,6 +37,7 @@ class PCA:
     def PCA(self):
         mat = np.mat(self.X_data).T
         centeralized_mat = mat - np.mean(mat, 1)
+        # np.linalg.svd输出奇异值由大到小排列
         u, sigma, v = np.linalg.svd(centeralized_mat)
         self.Projective_matrix = u[:, 0:self.reduced_dimension]
         print(self.Projective_matrix)

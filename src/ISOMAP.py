@@ -93,7 +93,7 @@ class ISOMAP:
         self.reduced_dimension = k
 
     def make_data(self):
-        self.X_data, t = make_swiss_roll(100, noise=0, random_state=0)
+        self.X_data, t = make_swiss_roll(1000, noise=0, random_state=0)
         ward = AgglomerativeClustering(n_clusters=6, linkage='ward').fit(self.X_data)
         self.Y_data = ward.labels_
 
@@ -132,8 +132,13 @@ class ISOMAP:
         # A是对角阵，Q是特征向量矩阵
         # 注意可能由于数值精度产生虚数，可以直接取实部计算
         A, Q = np.linalg.eig(self.B)
-        Qk = Q[:, :self.reduced_dimension].real
-        Ak = np.diag(A[:self.reduced_dimension].real ** 0.5)
+        A = A.real
+        sorted_index = np.argsort(-A)[:self.reduced_dimension]
+        Qk = Q[:, sorted_index].real
+        Ak = np.diag(A[sorted_index].real ** 0.5)
+
+        # Qk = Q[:, :self.reduced_dimension].real
+        # Ak = np.diag(A[:self.reduced_dimension].real ** 0.5)
         self.new_data = Qk @ Ak
         print("new_data.shape = ", self.new_data.shape)
 
@@ -192,10 +197,11 @@ class ISOMAP:
         ax.axis("equal")
         plt.show()
 
+
 if __name__ == "__main__":
     a = ISOMAP(2)  # 降至两维
     a.make_data()
-    a.Isomap(10) # 用KNN建图
+    a.Isomap(10)  # 用KNN建图
     a.result()
 
 

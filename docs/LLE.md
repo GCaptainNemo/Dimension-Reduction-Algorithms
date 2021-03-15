@@ -16,6 +16,7 @@ LLE希望上式的重构关系在降维后得到保持。
 ![LLE-algorithm](../resources/LLE/LLE_algorithm.png)
 
 ```
+目标：将数据由d维降至d'维
 1. 寻找每个样本的k个近邻点。
 2. 由每个样本的近邻点计算局部重建权值矩阵W。
 3. 由局部重建权值矩阵W计算样本点的降维(嵌入)坐标。
@@ -27,8 +28,25 @@ Notation：对数据点xi∈R<sup>d</sup>，其k个邻域点为xij，wij为对�
 
 将上式写成矩阵形式并用lagrange乘子法求解，有闭式解：
 
-![LLE](../resources/LLE/LLE_2.png)
+![LLE](../resources/LLE/lle_2.jpg)
 
-计算出每个数据点对应权值后可以将其写成一个N×N矩阵W，不在k近邻位置元素的权重记为0
+计算出每个数据点对应权值后可以用N×N矩阵W表示，满足(W)<sub>ji</sub> = wij，不在k近邻位置元素的权重记为0
 
 ## 2.3 计算低维坐标
+
+Notation: Zi为降维后的坐标(待优化参数)，wij在2.2已求，属于已知变量。
+
+![LLE](../resources/LLE/LLE_3.png)
+
+同2.2，将上述优化写成矩阵的形式后，得：
+
+![LLE](../resources/LLE/LLE_4.png)
+
+对M做特征值分解，Z就是M最小d'个特征值对应特征向量矩阵的转置。
+
+
+## 四、参考资料
+[1]周志华. 机器学习 : = Machine learning[M]. 清华大学出版社, 2016.(第十章)
+
+[2][https://blog.csdn.net/scott198510/article/details/76099630](https://blog.csdn.net/scott198510/article/details/76099630)
+
