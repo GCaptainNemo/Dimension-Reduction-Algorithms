@@ -1,6 +1,6 @@
 # 局部线性嵌入
 ## 一、介绍
-局部线性嵌入(Locally Linear Embedding)和Isomap一样属于流形学习的范畴，流形学习的介绍见[Isomap](ISOMAP.md)。Isomap算法假定嵌入映射是一个保测地距离映射。
+局部线性嵌入(Locally Linear Embedding)和Isomap一样是非线性的无监督降维方法，属于流形学习的范畴，流形学习的介绍见[Isomap](ISOMAP.md)。Isomap算法假定嵌入映射是一个保测地距离映射。
 而LLE则认为嵌入映射让邻域之间的线性关系得到保持。假定高维空间样本点xi能通过它的邻域样本，xj，xk，xl的坐标线性组合而重构出来：
 
 xi = w<sub>ij</sub>xj + w<sub>ik</sub>xk + w<sub>il</sub>xl

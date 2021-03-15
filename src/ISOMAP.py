@@ -93,7 +93,7 @@ class ISOMAP:
         self.reduced_dimension = k
 
     def make_data(self):
-        self.X_data, t = make_swiss_roll(1000, noise=0, random_state=0)
+        self.X_data, t = make_swiss_roll(100, noise=0, random_state=0)
         ward = AgglomerativeClustering(n_clusters=6, linkage='ward').fit(self.X_data)
         self.Y_data = ward.labels_
 
@@ -106,8 +106,15 @@ class ISOMAP:
         n = self.X_data.shape[0]
         adjacency_matrix = np.ones([n, n]) * np.inf
         for i in range(n):
-            dist_tuple, index_tuple = kd_tree.query(self.X_data[i, :], k=k, p=2)
-            for index, value in enumerate(index_tuple):
+            # 由于最近邻查询邻居包含自身，需要去除
+            dist_tuple, index_tuple = kd_tree.query(self.X_data[i, :], k=k+1, p=2)
+            dist_lst = list(dist_tuple)
+            index_lst = list(index_tuple)
+            remove_index = index_lst.index(i)
+            print(i, index_lst[remove_index])
+            dist_lst.pop(remove_index)
+            index_lst.pop(remove_index)
+            for index, value in enumerate(index_lst):
                 adjacency_matrix[i, value] = dist_tuple[index]
         return adjacency_matrix
 
