@@ -34,7 +34,7 @@ LDA多分类问题和二分类问题的优化形式和求解方式相同，唯�
 
 ![within-class](../resources/LDA/lda_within_2.png)
 
-而类间散度矩阵(between-class scatter matrix)则需要用全局散度矩阵诱导出来：
+而类间散度矩阵(between-class scatter matrix)则需要用全局散度矩阵诱导出来(也是二分类LDA的推广)：
 
 ![between-class](../resources/LDA/lda_between_2.png)
 
