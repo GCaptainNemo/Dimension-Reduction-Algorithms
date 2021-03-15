@@ -37,12 +37,10 @@ class MDS:
         self.D = self.construct_distance_matrix()
         self.B = self.construct_innerprod_matrix()
         # A是对角阵，Q是特征向量矩阵
-        # 注意可能由于数值精度产生虚数，可以直接取实部计算
-        A, Q = np.linalg.eig(self.B)
-        A = A.real
-        sorted_index = np.argsort(-A)[:self.reduced_dimension]
-        Qk = Q[:, sorted_index].real
-        Ak = np.diag(A[sorted_index].real ** 0.5)
+        # self.B是对称正定矩阵，用svd分解算特征值、特征向量更好
+        u, sigma, vT = np.linalg.svd(self.B)
+        Qk = u[:, :self.reduced_dimension]
+        Ak = np.diag(sigma[:self.reduced_dimension] ** 0.5)
         self.new_data = Qk @ Ak
         print(self.new_data.shape)
 
@@ -64,7 +62,6 @@ class MDS:
         length = self.D.shape[0]
         meandist2 = np.mean(list(map(lambda x: x**2, self.D)))
         meandist2_column_lst = []
-
         for j in range(length):
             meandist2_column_lst.append(np.mean(list(map(lambda x: x**2,
                                                          self.D[:, j]))))
@@ -116,24 +113,11 @@ class MDS:
 
         ax = plt.gca()
         ax.axis("equal")
-
         plt.show()
-
-        # ax.annotate("",
-        #             xy=(translate_vector[0], translate_vector[1]),
-        #             xytext=(0, 0),
-        #             # xycoords="figure points",
-        #             arrowprops=dict(arrowstyle="->", color="k"))
-        # if regression:
-        #     plt.text(translate_vector[0] * 0.9, translate_vector[1] * 0.95 + 10,
-        #              r'projection', fontdict={'size': 8, 'color': 'k'})
-        # else:
-        #     plt.text(translate_vector[0] * 0.95 + 0.05, translate_vector[1] * 0.95,
-        #              r'projection', fontdict={'size': 8, 'color': 'k'})
 
 
 if __name__ == "__main__":
-    a = MDS(2)
+    a = MDS(1)
     a.make_data()
     a.MDS()
     a.result()

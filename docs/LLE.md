@@ -42,10 +42,27 @@ Notation: Zi为降维后的坐标(待优化参数)，wij在2.2已求，属于已
 
 ![LLE](../resources/LLE/LLE_4.png)
 
-对M做特征值分解，Z就是M最小d'个特征值对应特征向量矩阵的转置。
+对M做特征值分解，Z就是M最小d'个特征值对应特征向量矩阵的转置。**注意**：0天然是M最小的特征值，对应特征向量为[1, 1, ..., 1]，所以如果将0包括在内，则会导致降维实际上少一个自由度，
+因此常常取**非0最小的d'个特征值**对应特征向量作为降维坐标Z。
 
+## 三、效果
+### 1. 原始数据 swiss roll(1000 points)
 
-## 四、参考资料
+![result](../results/LLE/origin_data.png)
+
+### 2. K=30，包括0特征值
+
+![result](../results/LLE/LLE_k_30.png)
+
+### 3. K=30，不包括0特征值
+
+![result](../results/LLE/LLE_k_30_without0.png)
+
+## 四、总结
+LLE相对ISOMAP来说，运算速度要快非常多，但从降维的效果可以看出，LLE降维数据有一大部分是重叠的，降维效果没有Isomap好。这是因为LLE只是保持数据局域的线性结构，
+而Isomap保持了全局的测地距离。
+
+## 五、参考资料
 [1]周志华. 机器学习 : = Machine learning[M]. 清华大学出版社, 2016.(第十章)
 
 [2][https://blog.csdn.net/scott198510/article/details/76099630](https://blog.csdn.net/scott198510/article/details/76099630)

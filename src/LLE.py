@@ -42,7 +42,7 @@ class LLE:
             adjacency_index_matrix[i, :] = np.array([index_lst])
         return adjacency_index_matrix
 
-    def LLE(self, knn=5):
+    def LLE(self, knn=5, remove_zero=True):
         adjacency_index_matrix = self.construct_graph(knn)
         n = self.X_data.shape[0]
         W = np.zeros([n, n])  # 关于所有点的权值矩阵，不在近邻则权值为0
@@ -57,15 +57,14 @@ class LLE:
                 # (W)j,i = wij
                 W[adjacency_index_matrix[i, j], i] = wi[j]
         M = (np.eye(n) - W) @ (np.eye(n) - W).T
-        # 注意:np.linalg.eig输出特征值的大小没有次序
-        eigen_value, eigen_vector = np.linalg.eig(M)
-        eigen_value = eigen_value.real
+        # 注意:M是对称半正定矩阵，用svd求特征值更好
+        eigen_vector, eigen_value, vT = np.linalg.svd(M)
         # 从小到大，取M的d'个最小特征值对应特征向量
-        sorted_index = np.argsort(eigen_value)[:self.reduced_dimension]
-        self.new_data = eigen_vector[:, sorted_index].real
-        print(eigen_value[sorted_index])
-        print(eigen_value[np.argmin(eigen_value)])
-        # print("self.new_data = ", self.new_data)
+        if remove_zero:
+            self.new_data = eigen_vector[:, -self.reduced_dimension-1:-1]
+        else:
+            self.new_data = eigen_vector[:, -self.reduced_dimension:]
+
 
     def result(self):
         fig = plt.figure()
@@ -78,7 +77,7 @@ class LLE:
                        s=20, edgecolor='k')
         plt.show()
         plt.figure()
-        plt.title("MDS")
+        plt.title("LLE")
         if self.reduced_dimension == 2:
 
             for l in np.unique(self.Y_data):
