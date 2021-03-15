@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # author： 11360
-# datetime： 2021/3/14 13:41 
+# datetime： 2021/3/14 13:41
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# author： 11360
+# datetime： 2021/3/12 0:38
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -138,9 +142,11 @@ class ISOMAP:
             return
 
         innerprod_matrix = np.zeros(self.D.shape)
+
         length = self.D.shape[0]
         meandist2 = np.mean(list(map(lambda x: x**2, self.D)))
         meandist2_column_lst = []
+
         for j in range(length):
             meandist2_column_lst.append(np.mean(list(map(lambda x: x**2,
                                                          self.D[:, j]))))
@@ -181,11 +187,47 @@ class ISOMAP:
                 plt.scatter(self.new_data[self.Y_data == l, 0],
                            color=plt.cm.jet(float(l) / np.max(self.Y_data + 1)),
                            s=20, edgecolor='k')
+            #
+            # for i in range(self.new_data.shape[0]):
+            #     if self.Y_data[i] == 1:
+            #         plt.scatter(self.new_data[i, 0], 0, c='r')
+            #         # plt.text(self.new_data[i, 0], translate,
+            #         #          i, fontdict={'size': 8, 'color': 'k'})
+            #     else:
+            #         plt.scatter(self.new_data[i, 0], 0, c='b')
+            #         # plt.text(self.new_data[i, 0], translate,
+            #         #          i, fontdict={'size': 8, 'color': 'k'})
+
         ax = plt.gca()
         ax.axis("equal")
+
         plt.show()
 
+        # ax.annotate("",
+        #             xy=(translate_vector[0], translate_vector[1]),
+        #             xytext=(0, 0),
+        #             # xycoords="figure points",
+        #             arrowprops=dict(arrowstyle="->", color="k"))
+        # if regression:
+        #     plt.text(translate_vector[0] * 0.9, translate_vector[1] * 0.95 + 10,
+        #              r'projection', fontdict={'size': 8, 'color': 'k'})
+        # else:
+        #     plt.text(translate_vector[0] * 0.95 + 0.05, translate_vector[1] * 0.95,
+        #              r'projection', fontdict={'size': 8, 'color': 'k'})
+
+
 if __name__ == "__main__":
+    # adjacency_matrix = np.array([[0, 5, np.inf, 7],
+    #                              [np.inf, 0, 4, 2],
+    #                              [3, 3, 0, 2],
+    #                              [np.inf, np.inf, 1, 0]])
+    # n = adjacency_matrix.shape[0]
+    # path_matrix = -np.ones([n, n], dtype=int)
+    # dist_matrix = adjacency_matrix.copy()
+    # dist_lst, parent_lst = ShortestPath.djikstra_algorithm(adjacency_matrix, 1)
+    # ShortestPath.print_djikstra_path(parent_lst, 0)
+    # ShortestPath.floyd_algorithm(path_matrix, dist_matrix)
+    # ShortestPath.print_floyd_path(path_matrix, 1, 0)
     a = ISOMAP(2)  # 降至两维
     a.make_data()
     a.Isomap(10) # 用KNN建图
