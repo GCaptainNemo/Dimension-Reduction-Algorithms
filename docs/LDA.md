@@ -60,16 +60,15 @@ LDA不仅是一个监督式线性降维算法，本身还是一个**分类器**�
 
 ![linear-classifier](../resources/LDA/prob/linear_classifier.png)
 
-可以看到LDA降维就是将数据朝着分类边界法向量上投影，降维后决策有两种方式：一是直接考虑投影的中心点，最近中心点就是其类别，这种方式没有考虑P(C)的先验，
-另一种是考虑P(C)先验，用线性决策函数来计算对应类别。
+上述参数Σ、μi、P(C)可以用训练集样本进行点估计。可以看到LDA降维就是将数据朝着分类边界法向量上投影，降维后决策有两种方式：一是直接考虑投影的中心点，
+最近中心点就是其类别，这种方式没有考虑P(C)的先验；另一种是考虑P(C)先验，用线性决策函数来计算对应类别。
 
 ## 三、效果
-
-## 1. moon数据
+### 1. moon数据
 
 ![moon](../results/LDA/moon.png)
 
-## 2. regression数据
+### 2. regression数据
 
 ![regression](../results/LDA/regression.png)
 
